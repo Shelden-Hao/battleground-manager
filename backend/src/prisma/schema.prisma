@@ -1,0 +1,219 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  email     String?  @unique
+  isActive  Boolean  @default(true)
+  role      Role     @default(user)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 关联关系
+  profile   Profile?
+  judge     Judge?
+}
+
+enum Role {
+  admin
+  manager
+  judge
+  user
+}
+
+model Profile {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  firstName String?
+  lastName  String?
+  phone     String?
+  avatarUrl String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // 关联关系
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Competition {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?   @db.Text
+  location    String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      CompetitionStatus @default(draft)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // 关联关系
+  stages      CompetitionStage[]
+  competitors Competitor[]
+  battles     Battle[]
+}
+
+enum CompetitionStatus {
+  draft
+  published
+  inProgress
+  completed
+  cancelled
+}
+
+model CompetitionStage {
+  id            Int       @id @default(autoincrement())
+  competitionId Int
+  name          String
+  stageType     StageType @default(qualification)
+  description   String?   @db.Text
+  startDate     DateTime?
+  endDate       DateTime?
+  order         Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // 关联关系
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  battles       Battle[]
+  
+  @@index([competitionId])
+}
+
+enum StageType {
+  qualification
+  preliminary
+  topRock
+  quarterfinal
+  semifinal
+  final
+  exhibition
+}
+
+model Competitor {
+  id            Int          @id @default(autoincrement())
+  competitionId Int
+  realName      String
+  bBoyName      String?
+  englishName   String?
+  gender        Gender       @default(male)
+  age           Int?
+  email         String?
+  phone         String?
+  city          String?
+  crew          String?
+  biography     String?      @db.Text
+  status        CompetitorStatus @default(registered)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  // 关联关系
+  competition   Competition  @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  battlesAsCompetitor1 Battle[] @relation("BattleCompetitor1")
+  battlesAsCompetitor2 Battle[] @relation("BattleCompetitor2")
+  battlesAsWinner      Battle[] @relation("BattleWinner")
+  scores               Score[]
+  
+  @@index([competitionId])
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum CompetitorStatus {
+  registered
+  confirmed
+  checkedIn
+  disqualified
+  withdrawn
+}
+
+enum BattleStatus {
+  pending
+  inProgress
+  completed
+  cancelled
+}
+
+model Battle {
+  id            Int         @id @default(autoincrement())
+  competitionId Int
+  stageId       Int
+  competitor1Id Int?
+  competitor2Id Int?
+  battleOrder   Int         @default(0)
+  winnerId      Int?
+  status        BattleStatus @default(pending)
+  startTime     DateTime?
+  endTime       DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // 关联关系
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  stage         CompetitionStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  competitor1   Competitor? @relation("BattleCompetitor1", fields: [competitor1Id], references: [id])
+  competitor2   Competitor? @relation("BattleCompetitor2", fields: [competitor2Id], references: [id])
+  winner        Competitor? @relation("BattleWinner", fields: [winnerId], references: [id])
+  scores        Score[]
+
+  @@unique([competitionId, stageId, battleOrder])
+  @@index([competitionId])
+  @@index([stageId])
+  @@index([competitor1Id])
+  @@index([competitor2Id])
+  @@index([winnerId])
+}
+
+model Score {
+  id               Int      @id @default(autoincrement())
+  battleId         Int
+  judgeId          Int
+  competitorId     Int
+  techniqueScore   Float?
+  originalityScore Float?
+  musicalityScore  Float?
+  executionScore   Float?
+  comments         String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // 关联关系
+  battle           Battle     @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  judge            Judge      @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  competitor       Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@unique([battleId, judgeId, competitorId])
+  @@index([battleId])
+  @@index([judgeId])
+  @@index([competitorId])
+}
+
+model Judge {
+  id         Int      @id @default(autoincrement())
+  userId     Int?     @unique
+  name       String
+  email      String?
+  phone      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // 关联关系
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  scores     Score[]
+  
+  @@index([userId])
+} 

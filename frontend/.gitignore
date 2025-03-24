@@ -1,0 +1,7 @@
+.DS_*
+*.log
+logs
+node_modules
+dist
+.idea
+.vscode

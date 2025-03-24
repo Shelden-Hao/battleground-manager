@@ -1,0 +1,216 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      Role     @default(competitor)
+  name      String?
+  email     String?  @unique
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  judges      Judge[]
+  competitors Competitor[]
+
+  @@map("users")
+}
+
+model Competition {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  @db.Text
+  startDate   DateTime @map("start_date") @db.Date
+  endDate     DateTime @map("end_date") @db.Date
+  location    String?
+  status      CompetitionStatus @default(draft)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  stages       CompetitionStage[]
+  competitors  Competitor[]
+  battles      Battle[]
+  judges       Judge[]
+  results      CompetitionResult[]
+
+  @@map("competitions")
+}
+
+model Competitor {
+  id                 Int      @id @default(autoincrement())
+  userId             Int?     @map("user_id")
+  competitionId      Int      @map("competition_id")
+  registrationNumber String?  @unique @map("registration_number")
+  bBoyName           String?  @map("b_boy_name")
+  realName           String   @map("real_name")
+  gender             Gender
+  birthDate          DateTime? @map("birth_date") @db.Date
+  nationality        String?
+  team               String?
+  photoUrl           String?  @map("photo_url")
+  status             CompetitorStatus @default(registered)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  
+  battlesAsCompetitor1 Battle[] @relation("Competitor1")
+  battlesAsCompetitor2 Battle[] @relation("Competitor2")
+  battlesAsWinner      Battle[] @relation("Winner")
+  scores               Score[]
+  results              CompetitionResult[]
+
+  @@map("competitors")
+}
+
+model CompetitionStage {
+  id           Int      @id @default(autoincrement())
+  competitionId Int     @map("competition_id")
+  name         String
+  description  String?  @db.Text
+  stageOrder   Int      @map("stage_order")
+  stageType    StageType
+  startTime    DateTime? @map("start_time")
+  endTime      DateTime? @map("end_time")
+  status       StageStatus @default(pending)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  competition  Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  battles      Battle[]
+
+  @@map("competition_stages")
+}
+
+model Battle {
+  id            Int      @id @default(autoincrement())
+  competitionId Int      @map("competition_id")
+  stageId       Int      @map("stage_id")
+  competitor1Id Int?     @map("competitor1_id")
+  competitor2Id Int?     @map("competitor2_id")
+  battleOrder   Int      @map("battle_order")
+  winnerId      Int?     @map("winner_id")
+  status        BattleStatus @default(scheduled)
+  startTime     DateTime? @map("start_time")
+  endTime       DateTime? @map("end_time")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  competition   Competition     @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  stage         CompetitionStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  competitor1   Competitor?     @relation("Competitor1", fields: [competitor1Id], references: [id], onDelete: SetNull)
+  competitor2   Competitor?     @relation("Competitor2", fields: [competitor2Id], references: [id], onDelete: SetNull)
+  winner        Competitor?     @relation("Winner", fields: [winnerId], references: [id], onDelete: SetNull)
+  
+  scores        Score[]
+
+  @@map("battles")
+}
+
+model Judge {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  competitionId Int      @map("competition_id")
+  name          String
+  description   String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  
+  scores        Score[]
+
+  @@map("judges")
+}
+
+model Score {
+  id               Int      @id @default(autoincrement())
+  battleId         Int      @map("battle_id")
+  judgeId          Int      @map("judge_id")
+  competitorId     Int      @map("competitor_id")
+  techniqueScore   Decimal? @map("technique_score") @db.Decimal(5, 2)
+  originalityScore Decimal? @map("originality_score") @db.Decimal(5, 2)
+  musicalityScore  Decimal? @map("musicality_score") @db.Decimal(5, 2)
+  executionScore   Decimal? @map("execution_score") @db.Decimal(5, 2)
+  comments         String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  
+  battle           Battle     @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  judge            Judge      @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  competitor       Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@unique([battleId, judgeId, competitorId])
+  @@map("scores")
+}
+
+model CompetitionResult {
+  id            Int      @id @default(autoincrement())
+  competitionId Int      @map("competition_id")
+  competitorId  Int      @map("competitor_id")
+  finalRank     Int?     @map("final_rank")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  competitor    Competitor  @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@unique([competitionId, competitorId])
+  @@map("competition_results")
+}
+
+enum Role {
+  admin
+  judge
+  competitor
+  staff
+}
+
+enum CompetitionStatus {
+  draft
+  registration
+  in_progress
+  completed
+}
+
+enum CompetitorStatus {
+  registered
+  qualified
+  eliminated
+}
+
+enum StageType {
+  qualification
+  top_16
+  top_8
+  top_4
+  final
+}
+
+enum StageStatus {
+  pending
+  in_progress
+  completed
+}
+
+enum BattleStatus {
+  scheduled
+  in_progress
+  completed
+}
+
+enum Gender {
+  male
+  female
+  other
+} 
