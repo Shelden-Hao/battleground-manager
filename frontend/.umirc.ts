@@ -10,6 +10,12 @@ export default defineConfig({
     title: '霹雳舞比赛管理系统',
     locale: false,
   },
+  proxy: {
+    '/api': {
+      target: 'http://localhost:3000',
+      changeOrigin: true,
+    },
+  },
   routes: [
     {
       path: '/',
@@ -41,6 +47,17 @@ export default defineConfig({
           path: '/competitions',
           component: './Competitions',
         },
+        {
+          path: '/competitions/:id',
+          component: './Competitions/detail',
+          hideInMenu: true,
+          exact: true,
+        },
+        {
+          path: '/competitions/:id/edit',
+          component: './Competitions/edit',
+          hideInMenu: true,
+        },
       ],
     },
     {
@@ -52,49 +69,41 @@ export default defineConfig({
           path: '/competitors',
           component: './Competitors',
         },
+        {
+          path: '/competitors/:id',
+          component: './Competitors/detail',
+          hideInMenu: true,
+          exact: true,
+        },
+        {
+          path: '/competitors/:id/edit',
+          component: './Competitors/edit',
+          hideInMenu: true,
+        },
       ],
     },
     {
-      name: '对阵管理',
+      name: '对战管理',
       path: '/battles',
       routes: [
         {
-          name: '对阵列表',
+          name: '对战列表',
           path: '/battles',
           component: './Battles',
         },
         {
-          name: '对阵详情',
           path: '/battles/:id',
-          component: './BattleDetail',
+          component: './Battles/detail',
           hideInMenu: true,
+          exact: true,
         },
         {
-          name: '创建对阵',
-          path: '/battles/create',
-          component: './BattleForm',
+          path: '/battles/:id/edit',
+          component: './Battles/edit',
           hideInMenu: true,
         },
       ],
     },
-    {
-      name: '评分管理',
-      path: '/scores',
-      component: './Scores',
-    },
-    {
-      name: '用户管理',
-      path: '/users',
-      component: './Users',
-      access: 'isAdmin',
-    },
   ],
   npmClient: 'npm',
-  proxy: {
-    '/api': {
-      target: 'http://localhost:3000',
-      changeOrigin: true,
-      pathRewrite: { '^/api': '' },
-    },
-  },
 });

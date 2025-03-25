@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { CompetitionsController } from './competitions.controller';
 import { CompetitionsService } from './competitions.service';
+import { CompetitionsController } from './competitions.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({

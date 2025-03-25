@@ -1,8 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { IsString, IsOptional, IsEnum, IsDate } from 'class-validator';
 import { CompetitionStatus } from '@prisma/client';
+import { CreateCompetitionDto } from './create-competition.dto';
+import { Type } from 'class-transformer';
 
-export class UpdateCompetitionDto {
+export class UpdateCompetitionDto extends PartialType(CreateCompetitionDto) {
   @ApiProperty({ description: '比赛名称', required: false })
   @IsString()
   @IsOptional()
@@ -13,15 +15,15 @@ export class UpdateCompetitionDto {
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ description: '开始日期 (YYYY-MM-DD)', required: false })
-  @IsDateString()
+  @Type(() => Date)
+  @IsDate()
   @IsOptional()
-  startDate?: string;
+  startDate?: Date;
 
-  @ApiProperty({ description: '结束日期 (YYYY-MM-DD)', required: false })
-  @IsDateString()
+  @Type(() => Date)
+  @IsDate()
   @IsOptional()
-  endDate?: string;
+  endDate?: Date;
 
   @ApiProperty({ description: '比赛地点', required: false })
   @IsString()

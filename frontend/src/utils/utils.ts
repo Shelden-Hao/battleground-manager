@@ -1,5 +1,6 @@
 import { parse, format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
 
 /**
  * 格式化日期时间
@@ -92,4 +93,24 @@ export function getRandomInt(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function formatDateTime(date: string | Date | undefined): string {
+  if (!date) return '';
+  return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+}
+
+export function formatDateRange(startDate: string | Date | undefined, endDate: string | Date | undefined): string {
+  if (!startDate || !endDate) return '';
+  return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+}
+
+export function formatDateTimeRange(startDate: string | Date | undefined, endDate: string | Date | undefined): string {
+  if (!startDate || !endDate) return '';
+  return `${formatDateTime(startDate)} - ${formatDateTime(endDate)}`;
+}
+
+export function parseDate(date: string | Date | undefined): dayjs.Dayjs | null {
+  if (!date) return null;
+  return dayjs(date);
 } 

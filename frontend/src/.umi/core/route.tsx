@@ -4,7 +4,7 @@
 import React from 'react';
 
 export async function getRoutes() {
-  const routes = {"1":{"path":"/","redirect":"/dashboard","parentId":"ant-design-pro-layout","id":"1"},"2":{"name":"登录","path":"/login","layout":false,"id":"2"},"3":{"name":"注册","path":"/register","layout":false,"id":"3"},"4":{"name":"首页","path":"/dashboard","parentId":"ant-design-pro-layout","id":"4"},"5":{"name":"比赛管理","path":"/competitions","parentId":"ant-design-pro-layout","id":"5"},"6":{"name":"比赛列表","path":"/competitions","parentId":"5","id":"6"},"7":{"name":"选手管理","path":"/competitors","parentId":"ant-design-pro-layout","id":"7"},"8":{"name":"选手列表","path":"/competitors","parentId":"7","id":"8"},"9":{"name":"对阵管理","path":"/battles","parentId":"ant-design-pro-layout","id":"9"},"10":{"name":"对阵列表","path":"/battles","parentId":"9","id":"10"},"11":{"name":"对阵详情","path":"/battles/:id","hideInMenu":true,"parentId":"9","id":"11"},"12":{"name":"创建对阵","path":"/battles/create","hideInMenu":true,"parentId":"9","id":"12"},"13":{"name":"评分管理","path":"/scores","parentId":"ant-design-pro-layout","id":"13"},"14":{"name":"用户管理","path":"/users","access":"isAdmin","parentId":"ant-design-pro-layout","id":"14"},"ant-design-pro-layout":{"id":"ant-design-pro-layout","path":"/","isLayout":true}} as const;
+  const routes = {"1":{"path":"/","redirect":"/dashboard","parentId":"ant-design-pro-layout","id":"1"},"2":{"name":"登录","path":"/login","layout":false,"id":"2"},"3":{"name":"注册","path":"/register","layout":false,"id":"3"},"4":{"name":"首页","path":"/dashboard","parentId":"ant-design-pro-layout","id":"4"},"5":{"name":"比赛管理","path":"/competitions","parentId":"ant-design-pro-layout","id":"5"},"6":{"name":"比赛列表","path":"/competitions","parentId":"5","id":"6"},"7":{"path":"/competitions/:id","hideInMenu":true,"exact":true,"parentId":"5","id":"7"},"8":{"path":"/competitions/:id/edit","hideInMenu":true,"parentId":"5","id":"8"},"9":{"name":"选手管理","path":"/competitors","parentId":"ant-design-pro-layout","id":"9"},"10":{"name":"选手列表","path":"/competitors","parentId":"9","id":"10"},"11":{"path":"/competitors/:id","hideInMenu":true,"exact":true,"parentId":"9","id":"11"},"12":{"path":"/competitors/:id/edit","hideInMenu":true,"parentId":"9","id":"12"},"13":{"name":"对战管理","path":"/battles","parentId":"ant-design-pro-layout","id":"13"},"14":{"name":"对战列表","path":"/battles","parentId":"13","id":"14"},"15":{"path":"/battles/:id","hideInMenu":true,"exact":true,"parentId":"13","id":"15"},"16":{"path":"/battles/:id/edit","hideInMenu":true,"parentId":"13","id":"16"},"ant-design-pro-layout":{"id":"ant-design-pro-layout","path":"/","isLayout":true}} as const;
   return {
     routes,
     routeComponents: {
@@ -14,14 +14,16 @@ export async function getRoutes() {
 '4': React.lazy(() => import(/* webpackChunkName: "p__Dashboard__index" */'@/pages/Dashboard/index.tsx')),
 '5': React.lazy(() => import('./EmptyRoute')),
 '6': React.lazy(() => import(/* webpackChunkName: "p__Competitions__index" */'@/pages/Competitions/index.tsx')),
-'7': React.lazy(() => import('./EmptyRoute')),
-'8': React.lazy(() => import(/* webpackChunkName: "p__Competitors__index" */'@/pages/Competitors/index.tsx')),
+'7': React.lazy(() => import(/* webpackChunkName: "p__Competitions__detail" */'@/pages/Competitions/detail.tsx')),
+'8': React.lazy(() => import(/* webpackChunkName: "p__Competitions__edit" */'@/pages/Competitions/edit.tsx')),
 '9': React.lazy(() => import('./EmptyRoute')),
-'10': React.lazy(() => import(/* webpackChunkName: "p__Battles__index" */'@/pages/Battles/index.tsx')),
-'11': React.lazy(() => import(/* webpackChunkName: "p__BattleDetail__index" */'@/pages/BattleDetail/index.tsx')),
-'12': React.lazy(() => import(/* webpackChunkName: "p__BattleForm__index" */'@/pages/BattleForm/index.tsx')),
-'13': React.lazy(() => import(/* webpackChunkName: "p__Scores__index" */'@/pages/Scores/index.tsx')),
-'14': React.lazy(() => import(/* webpackChunkName: "p__Users__index" */'@/pages/Users/index.tsx')),
+'10': React.lazy(() => import(/* webpackChunkName: "p__Competitors__index" */'@/pages/Competitors/index.tsx')),
+'11': React.lazy(() => import(/* webpackChunkName: "p__Competitors__detail" */'@/pages/Competitors/detail.tsx')),
+'12': React.lazy(() => import(/* webpackChunkName: "p__Competitors__edit" */'@/pages/Competitors/edit.tsx')),
+'13': React.lazy(() => import('./EmptyRoute')),
+'14': React.lazy(() => import(/* webpackChunkName: "p__Battles__index" */'@/pages/Battles/index.tsx')),
+'15': React.lazy(() => import(/* webpackChunkName: "p__Battles__detail" */'@/pages/Battles/detail.tsx')),
+'16': React.lazy(() => import(/* webpackChunkName: "p__Battles__edit" */'@/pages/Battles/edit.tsx')),
 'ant-design-pro-layout': React.lazy(() => import(/* webpackChunkName: "umi__plugin-layout__Layout" */'C:/Codefield/GitHub/battleground-manager/frontend/src/.umi/plugin-layout/Layout.tsx')),
 },
   };

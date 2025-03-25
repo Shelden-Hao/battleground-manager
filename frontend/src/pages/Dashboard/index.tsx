@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Col, Row, Statistic, Table } from 'antd';
 import { PageContainer } from '@ant-design/pro-components';
-import { useRequest } from '@umijs/max';
+import { request, useRequest } from '@umijs/max';
 import { Line } from '@ant-design/charts';
 
 const Dashboard: React.FC = () => {

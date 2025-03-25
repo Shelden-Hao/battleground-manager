@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Input, message, Tag, Space, Select, Popconfirm, Tooltip } from 'antd';
+import { Card, Table, Button, Input, message, Tag, Space, Select, Popconfirm, Tooltip, Modal, Form, DatePicker, Row, Col } from 'antd';
 import { history } from '@umijs/max';
 import { PlusOutlined, SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './index.less';
-import { getBattlesList, getBattlesByCompetition, getBattlesByStage, deleteBattle } from '@/services/battles';
+import { getBattlesList, getBattlesByCompetition, getBattlesByStage, deleteBattle, createBattle } from '@/services/battles';
 import { formatDate } from '@/utils/utils';
+import type { API } from '@/services/typings';
 
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 // 对阵状态映射
 const battleStatusMap: Record<string, { color: string; text: string }> = {
@@ -20,13 +22,18 @@ const battleStatusMap: Record<string, { color: string; text: string }> = {
 const BattlesList: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [battles, setBattles] = useState<API.Battle[]>([]);
+  const [total, setTotal] = useState(0);
+  const [current, setCurrent] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
   const [competitionId, setCompetitionId] = useState<number | undefined>(undefined);
   const [stageId, setStageId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     fetchBattles();
-  }, [competitionId, stageId]);
+  }, [current, pageSize, competitionId, stageId]);
 
   const fetchBattles = async () => {
     try {
@@ -38,13 +45,19 @@ const BattlesList: React.FC = () => {
       } else if (competitionId) {
         response = await getBattlesByCompetition(competitionId);
       } else {
-        response = await getBattlesList();
+        response = await getBattlesList({
+          current,
+          pageSize,
+        });
       }
       
-      setBattles(response);
-      setLoading(false);
+      if (response.success) {
+        setBattles(response.data);
+        setTotal(response.total);
+      }
     } catch (error) {
       message.error('获取对阵列表失败');
+    } finally {
       setLoading(false);
     }
   };
@@ -75,6 +88,30 @@ const BattlesList: React.FC = () => {
       stageName.toLowerCase().includes(searchText.toLowerCase())
     );
   });
+
+  const handleCreate = async (values: any) => {
+    try {
+      const [startTime, endTime] = values.timeRange || [];
+      const data = {
+        ...values,
+        startTime: startTime?.toISOString(),
+        endTime: endTime?.toISOString(),
+      };
+      delete data.timeRange;
+
+      const response = await createBattle(data);
+      if (response.success) {
+        message.success('创建成功');
+        setModalVisible(false);
+        form.resetFields();
+        fetchBattles();
+      } else {
+        message.error('创建失败');
+      }
+    } catch (error) {
+      message.error('创建失败');
+    }
+  };
 
   const columns: ColumnsType<API.Battle> = [
     {
@@ -167,6 +204,11 @@ const BattlesList: React.FC = () => {
       }
     },
     {
+      title: '结束时间',
+      dataIndex: 'endTime',
+      key: 'endTime',
+    },
+    {
       title: '操作',
       key: 'action',
       render: (_, record) => (
@@ -196,7 +238,7 @@ const BattlesList: React.FC = () => {
           <Button 
             type="primary" 
             icon={<PlusOutlined />} 
-            onClick={() => history.push('/battles/create')}
+            onClick={() => setModalVisible(true)}
           >
             创建对阵
           </Button>
@@ -249,13 +291,107 @@ const BattlesList: React.FC = () => {
           rowKey="id"
           loading={loading}
           pagination={{
-            defaultPageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条记录`,
+            current,
+            pageSize,
+            total,
+            onChange: (page, size) => {
+              setCurrent(page);
+              setPageSize(size);
+            },
           }}
         />
       </Card>
+
+      <Modal
+        title="创建对战"
+        open={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        footer={null}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleCreate}
+        >
+          <Form.Item
+            name="competitionId"
+            label="比赛"
+            rules={[{ required: true, message: '请选择比赛' }]}
+          >
+            <Select>
+              {/* TODO: 从后端获取比赛列表 */}
+              <Option value={1}>示例比赛</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="stageId"
+            label="阶段"
+            rules={[{ required: true, message: '请选择阶段' }]}
+          >
+            <Select>
+              {/* TODO: 从后端获取阶段列表 */}
+              <Option value={1}>示例阶段</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="competitor1Id"
+            label="选手1"
+            rules={[{ required: true, message: '请选择选手1' }]}
+          >
+            <Select>
+              {/* TODO: 从后端获取选手列表 */}
+              <Option value={1}>示例选手1</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="competitor2Id"
+            label="选手2"
+            rules={[{ required: true, message: '请选择选手2' }]}
+          >
+            <Select>
+              {/* TODO: 从后端获取选手列表 */}
+              <Option value={2}>示例选手2</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="status"
+            label="状态"
+            rules={[{ required: true, message: '请选择状态' }]}
+          >
+            <Select>
+              <Option value="pending">未开始</Option>
+              <Option value="in_progress">进行中</Option>
+              <Option value="completed">已完成</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="timeRange"
+            label="比赛时间"
+            rules={[{ required: true, message: '请选择比赛时间' }]}
+          >
+            <RangePicker
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                创建
+              </Button>
+              <Button onClick={() => setModalVisible(false)}>
+                取消
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
