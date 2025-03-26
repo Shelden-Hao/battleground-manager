@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import { API } from "@/services/typings.d";
 
 export async function login(params: API.LoginParams): Promise<API.LoginResult> {
   return request('/api/auth/login', {
@@ -18,4 +19,4 @@ export async function getCurrentUser() {
   return request<API.CurrentUser>('/api/auth/profile', {
     method: 'GET',
   });
-} 
+}

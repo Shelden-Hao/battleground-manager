@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // 启用全局验证管道
   app.useGlobalPipes(
     new ValidationPipe({
@@ -14,7 +14,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  
+
   // 配置 CORS
   app.enableCors({
     origin: true, // 允许所有来源
@@ -22,7 +22,7 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: 'Authorization,Content-Type',
   });
-  
+
   // 配置 Swagger 文档
   const config = new DocumentBuilder()
     .setTitle('霹雳舞比赛管理系统 API')
@@ -41,13 +41,12 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  
+
   const port = process.env.PORT || 3000;
   app.use((req, res, next) => {
-    console.log('Request headers:', req.headers);
     next();
   });
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
 }
-bootstrap(); 
+bootstrap();

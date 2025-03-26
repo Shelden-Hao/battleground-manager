@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { history, useModel } from '@umijs/max';
 import styles from './index.less';
 import { login } from '@/services/auth';
+import {API} from "@/services/typings.d";
 
 const LoginPage: React.FC = () => {
   const [loginError, setLoginError] = useState<string>('');
@@ -12,7 +13,7 @@ const LoginPage: React.FC = () => {
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
-    
+
     if (userInfo) {
       await setInitialState((state) => ({
         ...state,
@@ -24,11 +25,11 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (values: API.LoginParams) => {
     try {
       const result = await login(values);
-      
+
       if (result) {
         message.success('登录成功');
         localStorage.setItem('token', result.access_token);
-        
+
         await fetchUserInfo();
         history.push('/dashboard');
         return;
@@ -96,4 +97,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

@@ -18,6 +18,10 @@ declare namespace API {
     user: CurrentUser;
   };
 
+  type RegisterParams = {
+
+  }
+
   type PageParams = {
     current?: number;
     pageSize?: number;
@@ -115,4 +119,4 @@ declare namespace API {
     message: string;
     error?: string;
   };
-} 
+}

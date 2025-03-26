@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { history, Outlet, useLocation } from '@umijs/max';
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { 
   Card, Table, Button, Space, Tag, Input, message, 
   Popconfirm, Modal, Form, DatePicker, InputNumber, Select 
@@ -18,6 +18,7 @@ const { RangePicker } = DatePicker;
 
 const CompetitionsList: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const showListPage = location.pathname === '/competitions';
 
   const [loading, setLoading] = useState(false);
@@ -64,16 +65,21 @@ const CompetitionsList: React.FC = () => {
 
   const handleCreate = async (values: any) => {
     try {
-      const [startDate, endDate] = values.dateRange;
-      const [registrationStartDate, registrationEndDate] = values.registrationDateRange;
+      const [startDate, endDate] = values.dateRange || [];
+      const [_, registrationDeadline] = values.registrationDateRange || [];
       
-      const response = await createCompetition({
-        ...values,
-        startDate: startDate.format('YYYY-MM-DD'),
-        endDate: endDate.format('YYYY-MM-DD'),
-        registrationStartDate: registrationStartDate.format('YYYY-MM-DD'),
-        registrationDeadline: registrationEndDate.format('YYYY-MM-DD'),
-      });
+      const data = {
+        name: values.name,
+        description: values.description,
+        location: values.location,
+        maxParticipants: values.maxParticipants,
+        startDate: startDate?.format('YYYY-MM-DD'),
+        endDate: endDate?.format('YYYY-MM-DD'),
+        registrationDeadline: registrationDeadline?.format('YYYY-MM-DD'),
+        status: values.status
+      };
+
+      const response = await createCompetition(data);
 
       if (response.success) {
         message.success('创建比赛成功');
@@ -83,8 +89,8 @@ const CompetitionsList: React.FC = () => {
       } else {
         message.error('创建比赛失败');
       }
-    } catch (error) {
-      message.error('创建比赛失败');
+    } catch (error: any) {
+      message.error(error.response?.data?.message || '创建比赛失败');
       console.error('创建比赛错误:', error);
     }
   };
@@ -168,14 +174,14 @@ const CompetitionsList: React.FC = () => {
           <Button
             type="link"
             icon={<EyeOutlined />}
-            onClick={() => history.push(`/competitions/${record.id}`)}
+            onClick={() => navigate(`/competitions/${record.id}`)}
           >
             查看
           </Button>
           <Button
             type="link"
             icon={<EditOutlined />}
-            onClick={() => history.push(`/competitions/${record.id}/edit`)}
+            onClick={() => navigate(`/competitions/${record.id}/edit`)}
           >
             编辑
           </Button>
@@ -244,7 +250,10 @@ const CompetitionsList: React.FC = () => {
       <Modal
         title="新建比赛"
         open={modalVisible}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => {
+          setModalVisible(false);
+          form.resetFields();
+        }}
         footer={null}
         width={700}
       >
@@ -279,7 +288,6 @@ const CompetitionsList: React.FC = () => {
           <Form.Item
             name="location"
             label="比赛地点"
-            rules={[{ required: true, message: '请输入比赛地点' }]}
           >
             <Input />
           </Form.Item>
@@ -303,16 +311,13 @@ const CompetitionsList: React.FC = () => {
           <Form.Item
             name="status"
             label="比赛状态"
-            rules={[{ required: true, message: '请选择比赛状态' }]}
             initialValue="draft"
           >
             <Select>
               <Option value="draft">草稿</Option>
-              <Option value="published">已发布</Option>
-              <Option value="registration_closed">报名截止</Option>
+              <Option value="registration">报名中</Option>
               <Option value="in_progress">进行中</Option>
               <Option value="completed">已结束</Option>
-              <Option value="cancelled">已取消</Option>
             </Select>
           </Form.Item>
 
@@ -321,7 +326,10 @@ const CompetitionsList: React.FC = () => {
               <Button type="primary" htmlType="submit">
                 创建
               </Button>
-              <Button onClick={() => setModalVisible(false)}>
+              <Button onClick={() => {
+                setModalVisible(false);
+                form.resetFields();
+              }}>
                 取消
               </Button>
             </Space>

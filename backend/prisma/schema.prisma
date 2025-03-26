@@ -31,6 +31,8 @@ model Competition {
   startDate   DateTime @map("start_date") @db.Date
   endDate     DateTime @map("end_date") @db.Date
   location    String?
+  maxParticipants Int  @default(32) @map("max_participants")
+  registrationDeadline DateTime? @map("registration_deadline") @db.Date
   status      CompetitionStatus @default(draft)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -78,7 +80,7 @@ model CompetitionStage {
   name         String
   description  String?  @db.Text
   stageOrder   Int      @map("stage_order")
-  stageType    StageType
+  stageType    StageType @map("stage_type")
   startTime    DateTime? @map("start_time")
   endTime      DateTime? @map("end_time")
   status       StageStatus @default(pending)

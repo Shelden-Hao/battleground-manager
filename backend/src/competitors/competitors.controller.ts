@@ -9,7 +9,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { Competitor } from '@prisma/client';
 
 @ApiTags('competitors')
-@Controller('competitors')
+@Controller('api/competitors')
 @ApiBearerAuth()
 export class CompetitorsController {
   constructor(private readonly competitorsService: CompetitorsService) {}
@@ -82,4 +82,4 @@ export class CompetitorsController {
   getCompetitorBattles(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return this.competitorsService.getCompetitorBattles(id);
   }
-} 
+}

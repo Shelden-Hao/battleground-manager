@@ -6,7 +6,7 @@ import { UpdateBattleDto } from './dto/update-battle.dto';
 import { Battle } from '@prisma/client';
 
 @ApiTags('battles')
-@Controller('battles')
+@Controller('api/battles')
 export class BattlesController {
   constructor(private readonly battlesService: BattlesService) {}
 
@@ -77,4 +77,4 @@ export class BattlesController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.battlesService.remove(id);
   }
-} 
+}

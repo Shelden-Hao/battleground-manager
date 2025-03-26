@@ -16,34 +16,34 @@ export class BattlesService {
         const competitor1 = await this.prisma.competitor.findUnique({
           where: { id: createBattleDto.competitor1Id },
         });
-        
+
         const competitor2 = await this.prisma.competitor.findUnique({
           where: { id: createBattleDto.competitor2Id },
         });
-        
+
         if (!competitor1 || !competitor2) {
           throw new NotFoundException('选手不存在');
         }
-        
-        if (competitor1.competitionId !== createBattleDto.competitionId || 
+
+        if (competitor1.competitionId !== createBattleDto.competitionId ||
             competitor2.competitionId !== createBattleDto.competitionId) {
           throw new BadRequestException('选手必须属于同一个比赛');
         }
       }
-      
+
       // 检查比赛阶段是否存在
       const stage = await this.prisma.competitionStage.findUnique({
         where: { id: createBattleDto.stageId },
       });
-      
+
       if (!stage) {
         throw new NotFoundException('比赛阶段不存在');
       }
-      
+
       if (stage.competitionId !== createBattleDto.competitionId) {
         throw new BadRequestException('比赛阶段必须属于指定的比赛');
       }
-      
+
       return this.prisma.battle.create({
         data: createBattleDto,
       });
@@ -213,7 +213,7 @@ export class BattlesService {
       if (!battle) {
         throw new NotFoundException(`对阵ID为 ${id} 的记录不存在`);
       }
-      
+
       // 如果设置了获胜者，自动将状态更新为已完成
       if (updateBattleDto.winnerId && !updateBattleDto.status) {
         updateBattleDto.status = BattleStatus.completed;
@@ -306,7 +306,7 @@ export class BattlesService {
           },
         };
       }
-      
+
       competitorScores[compId].judgeScores.push({
         judge: score.judge,
         techniqueScore: score.techniqueScore,
@@ -322,9 +322,9 @@ export class BattlesService {
       const scores = competitorScores[compId].judgeScores;
       if (scores.length > 0) {
         let techniqueSum = 0, originalitySum = 0, musicalitySum = 0, executionSum = 0, count = 0;
-        
+
         scores.forEach(score => {
-          if (score.techniqueScore && score.originalityScore && 
+          if (score.techniqueScore && score.originalityScore &&
               score.musicalityScore && score.executionScore) {
             techniqueSum += Number(score.techniqueScore);
             originalitySum += Number(score.originalityScore);
@@ -333,7 +333,7 @@ export class BattlesService {
             count++;
           }
         });
-        
+
         if (count > 0) {
           competitorScores[compId].averages = {
             technique: parseFloat((techniqueSum / count).toFixed(2)),
@@ -351,4 +351,4 @@ export class BattlesService {
       scores: Object.values(competitorScores),
     };
   }
-} 
+}

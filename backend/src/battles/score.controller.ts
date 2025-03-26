@@ -4,7 +4,7 @@ import { ScoreService } from './score.service';
 import { CreateScoreDto, UpdateScoreDto } from './dto/score.dto';
 
 @ApiTags('scores')
-@Controller('scores')
+@Controller('api/scores')
 export class ScoreController {
   constructor(private readonly scoreService: ScoreService) {}
 
@@ -91,4 +91,4 @@ export class ScoreController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.scoreService.remove(id);
   }
-} 
+}

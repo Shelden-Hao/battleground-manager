@@ -7,7 +7,7 @@ import {CreateUserDto} from '../users/dto/create-user.dto';
 import {LoginDto} from './dto/login.dto';
 
 @ApiTags('auth')
-@Controller('auth')
+@Controller('api/auth')
 @ApiBearerAuth()
 export class AuthController {
     constructor(private readonly authService: AuthService) {
@@ -20,6 +20,7 @@ export class AuthController {
     @ApiResponse({status: 200, description: '登录成功'})
     @ApiResponse({status: 401, description: '登录失败'})
     async login(@Request() req) {
+        console.log('login', req);
         return this.authService.login(req.user);
     }
 
