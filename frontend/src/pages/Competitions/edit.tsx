@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { history, useParams } from '@umijs/max';
-import { 
-  Card, Form, Input, DatePicker, InputNumber, Select, 
-  Button, message, Space 
+import {
+  Card, Form, Input, DatePicker, InputNumber, Select,
+  Button, message, Space
 } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { getCompetitionDetail, updateCompetition } from '@/services/competitions';
+import {getCompetitionDetail, updateCompetition, UpdateCompetitionParams} from '@/services/competitions';
 import { parseDate } from '@/utils/utils';
 import type { API } from '@/services/typings';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-const CompetitionEdit: React.FC = () => {
+const CompetitionEdit: React.FC = (data: UpdateCompetitionParams) => {
   const { id } = useParams<{ id: string }>();
   const competitionId = parseInt(id);
-  
+
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
@@ -53,15 +53,9 @@ const CompetitionEdit: React.FC = () => {
 
   const handleSubmit = async (values: any) => {
     try {
-      const [startDate, endDate] = values.dateRange;
-      const [registrationStartDate, registrationEndDate] = values.registrationDateRange;
-      
-      const response = await updateCompetition(competitionId, {
-        ...values,
-        startDate: startDate.format('YYYY-MM-DD'),
-        endDate: endDate.format('YYYY-MM-DD'),
-        registrationStartDate: registrationStartDate.format('YYYY-MM-DD'),
-        registrationDeadline: registrationEndDate.format('YYYY-MM-DD'),
+
+      const response = await updateCompetition(String(competitionId), {
+        ...values
       });
 
       if (response.success) {
@@ -80,8 +74,8 @@ const CompetitionEdit: React.FC = () => {
     <Card
       title={
         <Space>
-          <Button 
-            icon={<ArrowLeftOutlined />} 
+          <Button
+            icon={<ArrowLeftOutlined />}
             onClick={() => history.push(`/competitions/${competitionId}`)}
             type="link"
           />
@@ -111,11 +105,19 @@ const CompetitionEdit: React.FC = () => {
         </Form.Item>
 
         <Form.Item
-          name="dateRange"
-          label="比赛时间"
-          rules={[{ required: true, message: '请选择比赛时间' }]}
+          name="startDate"
+          label="比赛开始时间"
+          rules={[{ required: true, message: '请选择比赛开始时间' }]}
         >
-          <RangePicker style={{ width: '100%' }} />
+          <Input style={{ width: '100%' }} />
+        </Form.Item>
+
+        <Form.Item
+            name="endDate"
+            label="比赛结束时间"
+            rules={[{ required: true, message: '请选择比赛结束时间' }]}
+        >
+          <Input style={{ width: '100%' }} />
         </Form.Item>
 
         <Form.Item
@@ -135,11 +137,11 @@ const CompetitionEdit: React.FC = () => {
         </Form.Item>
 
         <Form.Item
-          name="registrationDateRange"
-          label="报名时间"
-          rules={[{ required: true, message: '请选择报名时间' }]}
+          name="registrationDeadline"
+          label="报名结束时间"
+          rules={[{ required: true, message: '请选择报名结束时间' }]}
         >
-          <RangePicker style={{ width: '100%' }} />
+          <Input style={{ width: '100%' }} />
         </Form.Item>
 
         <Form.Item
@@ -172,4 +174,4 @@ const CompetitionEdit: React.FC = () => {
   );
 };
 
-export default CompetitionEdit; 
+export default CompetitionEdit;

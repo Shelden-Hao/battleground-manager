@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
-import { 
-  Card, Table, Button, Space, Tag, Input, message, 
-  Popconfirm, Modal, Form, DatePicker, InputNumber, Select 
+import {
+  Card, Table, Button, Space, Tag, Input, message,
+  Popconfirm, Modal, Form, DatePicker, InputNumber, Select
 } from 'antd';
-import { 
-  PlusOutlined, SearchOutlined, EditOutlined, 
-  DeleteOutlined, EyeOutlined 
+import {
+  PlusOutlined, SearchOutlined, EditOutlined,
+  DeleteOutlined, EyeOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { getCompetitionsList, createCompetition, deleteCompetition } from '@/services/competitions';
@@ -65,17 +65,18 @@ const CompetitionsList: React.FC = () => {
 
   const handleCreate = async (values: any) => {
     try {
+      console.log("values>>>>", values)
       const [startDate, endDate] = values.dateRange || [];
       const [_, registrationDeadline] = values.registrationDateRange || [];
-      
+
       const data = {
         name: values.name,
         description: values.description,
         location: values.location,
         maxParticipants: values.maxParticipants,
-        startDate: startDate?.format('YYYY-MM-DD'),
-        endDate: endDate?.format('YYYY-MM-DD'),
-        registrationDeadline: registrationDeadline?.format('YYYY-MM-DD'),
+        startDate: startDate,
+        endDate: endDate,
+        registrationDeadline: registrationDeadline,
         status: values.status
       };
 
@@ -209,8 +210,8 @@ const CompetitionsList: React.FC = () => {
       title="比赛管理"
       extra={
         <Space>
-          <Input 
-            placeholder="搜索比赛" 
+          <Input
+            placeholder="搜索比赛"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             prefix={<SearchOutlined />}
@@ -340,4 +341,4 @@ const CompetitionsList: React.FC = () => {
   );
 };
 
-export default CompetitionsList; 
+export default CompetitionsList;

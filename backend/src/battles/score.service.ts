@@ -14,35 +14,35 @@ export class ScoreService {
       const battle = await this.prisma.battle.findUnique({
         where: { id: createScoreDto.battleId },
       });
-      
+
       if (!battle) {
         throw new NotFoundException(`对阵ID为 ${createScoreDto.battleId} 的记录不存在`);
       }
-      
+
       // 检查评委是否存在
       const judge = await this.prisma.judge.findUnique({
         where: { id: createScoreDto.judgeId },
       });
-      
+
       if (!judge) {
         throw new NotFoundException(`评委ID为 ${createScoreDto.judgeId} 的记录不存在`);
       }
-      
+
       // 检查选手是否存在，以及是否是本场对阵的选手
       const competitor = await this.prisma.competitor.findUnique({
         where: { id: createScoreDto.competitorId },
       });
-      
+
       if (!competitor) {
         throw new NotFoundException(`选手ID为 ${createScoreDto.competitorId} 的记录不存在`);
       }
-      
+
       // 检查选手是否是本场对阵的选手
-      if (battle.competitor1Id !== createScoreDto.competitorId && 
+      if (battle.competitor1Id !== createScoreDto.competitorId &&
           battle.competitor2Id !== createScoreDto.competitorId) {
         throw new BadRequestException('该选手不是本场对阵的参赛选手');
       }
-      
+
       // 检查是否已存在该评委对该选手在该对阵的评分
       const existingScore = await this.prisma.score.findFirst({
         where: {
@@ -51,7 +51,7 @@ export class ScoreService {
           competitorId: createScoreDto.competitorId,
         },
       });
-      
+
       if (existingScore) {
         // 如果已存在，更新评分
         return this.prisma.score.update({
@@ -65,7 +65,7 @@ export class ScoreService {
           },
         });
       }
-      
+
       // 创建新评分
       return this.prisma.score.create({
         data: createScoreDto,
@@ -108,11 +108,11 @@ export class ScoreService {
     const battle = await this.prisma.battle.findUnique({
       where: { id: battleId },
     });
-    
+
     if (!battle) {
       throw new NotFoundException(`对阵ID为 ${battleId} 的记录不存在`);
     }
-    
+
     return this.prisma.score.findMany({
       where: {
         battleId,
@@ -145,19 +145,19 @@ export class ScoreService {
     const battle = await this.prisma.battle.findUnique({
       where: { id: battleId },
     });
-    
+
     if (!battle) {
       throw new NotFoundException(`对阵ID为 ${battleId} 的记录不存在`);
     }
-    
+
     const competitor = await this.prisma.competitor.findUnique({
       where: { id: competitorId },
     });
-    
+
     if (!competitor) {
       throw new NotFoundException(`选手ID为 ${competitorId} 的记录不存在`);
     }
-    
+
     return this.prisma.score.findMany({
       where: {
         battleId,
@@ -183,11 +183,11 @@ export class ScoreService {
         competitorId,
       },
     });
-    
+
     if (!score) {
       throw new NotFoundException(`未找到对应的评分记录`);
     }
-    
+
     return score;
   }
 
@@ -197,11 +197,11 @@ export class ScoreService {
       const score = await this.prisma.score.findUnique({
         where: { id },
       });
-      
+
       if (!score) {
         throw new NotFoundException(`评分ID为 ${id} 的记录不存在`);
       }
-      
+
       return this.prisma.score.update({
         where: { id },
         data: updateScoreDto,
@@ -220,11 +220,11 @@ export class ScoreService {
       const score = await this.prisma.score.findUnique({
         where: { id },
       });
-      
+
       if (!score) {
         throw new NotFoundException(`评分ID为 ${id} 的记录不存在`);
       }
-      
+
       return this.prisma.score.delete({
         where: { id },
       });
@@ -244,7 +244,7 @@ export class ScoreService {
         competitorId,
       },
     });
-    
+
     if (scores.length === 0) {
       return {
         battleId,
@@ -257,15 +257,15 @@ export class ScoreService {
         judgeCount: 0,
       };
     }
-    
+
     let techniqueSum = 0;
     let originalitySum = 0;
     let musicalitySum = 0;
     let executionSum = 0;
     let count = 0;
-    
+
     scores.forEach(score => {
-      if (score.techniqueScore && score.originalityScore && 
+      if (score.techniqueScore && score.originalityScore &&
           score.musicalityScore && score.executionScore) {
         techniqueSum += Number(score.techniqueScore);
         originalitySum += Number(score.originalityScore);
@@ -274,7 +274,7 @@ export class ScoreService {
         count++;
       }
     });
-    
+
     if (count === 0) {
       return {
         battleId,
@@ -287,13 +287,13 @@ export class ScoreService {
         judgeCount: 0,
       };
     }
-    
+
     const techniqueAvg = parseFloat((techniqueSum / count).toFixed(2));
     const originalityAvg = parseFloat((originalitySum / count).toFixed(2));
     const musicalityAvg = parseFloat((musicalitySum / count).toFixed(2));
     const executionAvg = parseFloat((executionSum / count).toFixed(2));
     const totalAvg = parseFloat(((techniqueAvg + originalityAvg + musicalityAvg + executionAvg) / 4).toFixed(2));
-    
+
     return {
       battleId,
       competitorId,
@@ -305,4 +305,4 @@ export class ScoreService {
       judgeCount: count,
     };
   }
-} 
+}

@@ -58,9 +58,7 @@ export interface CreateCompetitionParams {
   status?: 'draft' | 'registration' | 'in_progress' | 'completed';
 }
 
-export interface UpdateCompetitionParams extends Partial<CreateCompetitionParams> {
-  id: number;
-}
+export interface UpdateCompetitionParams extends Partial<CreateCompetitionParams> {}
 
 export interface CreateCompetitionStageParams {
   competitionId: number;
@@ -171,8 +169,8 @@ export async function createCompetition(data: CreateCompetitionParams) {
 }
 
 // 更新比赛
-export async function updateCompetition(data: UpdateCompetitionParams) {
-  return request<Competition>(`/api/competitions/${data.id}`, {
+export async function updateCompetition(competitionId: string, data: UpdateCompetitionParams) {
+  return request<Competition>(`/api/competitions/${competitionId}`, {
     method: 'PATCH',
     data,
   });
@@ -361,4 +359,4 @@ export async function deleteCompetitionResult(competitionId: number, resultId: n
   return request<void>(`/api/competitions/${competitionId}/results/${resultId}`, {
     method: 'DELETE',
   });
-} 
+}
