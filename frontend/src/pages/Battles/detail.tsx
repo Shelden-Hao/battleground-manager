@@ -1,40 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, history } from '@umijs/max';
+import { useParams } from '@umijs/max';
 import { 
   Card, Descriptions, Button, Space, message,
-  Table, Tag, Row, Col, Statistic, Divider,
-  Typography, Empty, Progress, Tabs, Modal,
-  Form, Select, InputNumber, Input
+  Table, Tag, Row, Col, Statistic, 
+  Typography, Modal, Form, Select, InputNumber, Input
 } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { getBattleDetail, getBattleScores, createScore } from '@/services/battles';
+import { getBattleDetail, getBattleScores, createScore, updateBattle } from '@/services/battles';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
+
+interface BattleScore {
+  id: number;
+  judgeId: number;
+  judgeName: string;
+  competitorId: number;
+  competitorName: string;
+  techniqueScore: number;
+  originalityScore: number;
+  musicalityScore: number;
+  executionScore: number;
+  comments: string;
+  createdAt: string;
+}
 
 const BattleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const battleId = parseInt(id);
+  const battleId = parseInt(id || '0');
   
   const [loading, setLoading] = useState(false);
   const [battle, setBattle] = useState<any>(null);
-  const [scores, setScores] = useState<any[]>([]);
+  const [scores, setScores] = useState<BattleScore[]>([]);
   const [scoreModalVisible, setScoreModalVisible] = useState(false);
   const [form] = Form.useForm();
 
   useEffect(() => {
-    fetchBattleDetails();
-    fetchScores();
+    if (battleId) {
+      fetchBattleDetails();
+      fetchScores();
+    }
   }, [battleId]);
 
   const fetchBattleDetails = async () => {
     try {
       setLoading(true);
       const response = await getBattleDetail(battleId);
-      if (response.success) {
-        setBattle(response.data);
-      }
+      console.log('Battle detail:', response);
+      setBattle(response);
     } catch (error) {
+      console.error('获取对战信息失败:', error);
       message.error('获取对战信息失败');
     } finally {
       setLoading(false);
@@ -44,36 +59,44 @@ const BattleDetail: React.FC = () => {
   const fetchScores = async () => {
     try {
       const response = await getBattleScores(battleId);
-      if (response.success) {
-        setScores(response.data);
-      }
+      console.log('Battle scores:', response);
+      setScores(response || []);
     } catch (error) {
+      console.error('获取评分信息失败:', error);
       message.error('获取评分信息失败');
     }
   };
 
   const handleSetWinner = async (competitorId: number) => {
     try {
-      // TODO: 实现设置获胜者的API
+      const response = await updateBattle({
+        id: battleId,
+        winnerId: competitorId,
+        status: 'completed'
+      });
+      
       message.success('设置获胜者成功');
       fetchBattleDetails();
     } catch (error) {
+      console.error('设置获胜者失败:', error);
       message.error('设置获胜者失败');
     }
   };
 
   const handleSubmitScore = async (values: any) => {
     try {
-      const response = await createScore(battleId, values);
-      if (response.success) {
-        message.success('提交评分成功');
-        setScoreModalVisible(false);
-        form.resetFields();
-        fetchScores();
-      } else {
-        message.error('提交评分失败');
-      }
+      const scoreData = {
+        battleId,
+        ...values
+      };
+      
+      const response = await createScore(scoreData);
+      message.success('提交评分成功');
+      setScoreModalVisible(false);
+      form.resetFields();
+      fetchScores();
     } catch (error) {
+      console.error('提交评分失败:', error);
       message.error('提交评分失败');
     }
   };
@@ -91,18 +114,18 @@ const BattleDetail: React.FC = () => {
     },
     {
       title: '技术分',
-      dataIndex: 'technicalScore',
-      key: 'technicalScore',
+      dataIndex: 'techniqueScore',
+      key: 'techniqueScore',
     },
     {
-      title: '创意分',
-      dataIndex: 'creativeScore',
-      key: 'creativeScore',
+      title: '原创性',
+      dataIndex: 'originalityScore',
+      key: 'originalityScore',
     },
     {
-      title: '表现力',
-      dataIndex: 'performanceScore',
-      key: 'performanceScore',
+      title: '执行力',
+      dataIndex: 'executionScore',
+      key: 'executionScore',
     },
     {
       title: '音乐性',
@@ -110,20 +133,30 @@ const BattleDetail: React.FC = () => {
       key: 'musicalityScore',
     },
     {
-      title: '总分',
-      dataIndex: 'totalScore',
-      key: 'totalScore',
-    },
-    {
       title: '评语',
-      dataIndex: 'comment',
-      key: 'comment',
+      dataIndex: 'comments',
+      key: 'comments',
+      ellipsis: true,
     },
   ];
 
   if (!battle) {
-    return null;
+    return <Card loading={loading}>加载中...</Card>;
   }
+
+  // 处理状态显示
+  const getStatusTag = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return <Tag color="default">未开始</Tag>;
+      case 'in_progress':
+        return <Tag color="blue">进行中</Tag>;
+      case 'completed':
+        return <Tag color="green">已完成</Tag>;
+      default:
+        return <Tag>{status}</Tag>;
+    }
+  };
 
   return (
     <Card
@@ -131,7 +164,7 @@ const BattleDetail: React.FC = () => {
         <Space>
           <Button 
             icon={<ArrowLeftOutlined />} 
-            onClick={() => history.push('/battles')}
+            onClick={() => window.location.href = '/battles'}
             type="link"
           />
           <span>对战详情</span>
@@ -143,19 +176,14 @@ const BattleDetail: React.FC = () => {
         <Col span={24}>
           <Card>
             <Descriptions title="基本信息" bordered>
-              <Descriptions.Item label="比赛">{battle.competition?.name}</Descriptions.Item>
-              <Descriptions.Item label="阶段">{battle.stage?.name}</Descriptions.Item>
+              <Descriptions.Item label="比赛">{battle.competition?.name || '未知比赛'}</Descriptions.Item>
+              <Descriptions.Item label="阶段">{battle.stage?.name || '未知阶段'}</Descriptions.Item>
               <Descriptions.Item label="状态">
-                <Tag color={
-                  battle.status === 'completed' ? 'green' :
-                  battle.status === 'in_progress' ? 'blue' : 'default'
-                }>
-                  {battle.status === 'completed' ? '已完成' :
-                   battle.status === 'in_progress' ? '进行中' : '未开始'}
-                </Tag>
+                {getStatusTag(battle.status)}
               </Descriptions.Item>
-              <Descriptions.Item label="开始时间">{battle.startTime}</Descriptions.Item>
-              <Descriptions.Item label="结束时间">{battle.endTime}</Descriptions.Item>
+              <Descriptions.Item label="顺序编号">{battle.battleOrder || '-'}</Descriptions.Item>
+              <Descriptions.Item label="开始时间">{battle.startTime || '-'}</Descriptions.Item>
+              <Descriptions.Item label="结束时间">{battle.endTime || '-'}</Descriptions.Item>
             </Descriptions>
           </Card>
         </Col>
@@ -165,22 +193,50 @@ const BattleDetail: React.FC = () => {
             <Row gutter={16}>
               <Col span={12}>
                 <Card>
-                  <Title level={4}>{battle.competitor1?.name}</Title>
-                  <Descriptions column={1}>
-                    <Descriptions.Item label="英文名">{battle.competitor1?.englishName}</Descriptions.Item>
-                    <Descriptions.Item label="城市">{battle.competitor1?.city}</Descriptions.Item>
-                    <Descriptions.Item label="舞团">{battle.competitor1?.crew}</Descriptions.Item>
-                  </Descriptions>
+                  <Title level={4}>选手1</Title>
+                  {battle.competitor1 ? (
+                    <Descriptions column={1}>
+                      <Descriptions.Item label="姓名">{battle.competitor1.realName}</Descriptions.Item>
+                      <Descriptions.Item label="艺名">{battle.competitor1.bBoyName || '-'}</Descriptions.Item>
+                      <Descriptions.Item label="性别">{
+                        battle.competitor1.gender === 'male' ? '男' : 
+                        battle.competitor1.gender === 'female' ? '女' : '其他'
+                      }</Descriptions.Item>
+                      <Descriptions.Item label="舞团">{battle.competitor1.team || '-'}</Descriptions.Item>
+                      <Descriptions.Item label="国籍">{battle.competitor1.nationality || '-'}</Descriptions.Item>
+                      {battle.winnerId === battle.competitor1.id && (
+                        <Descriptions.Item label="状态">
+                          <Tag color="gold">获胜者</Tag>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <div>未分配选手</div>
+                  )}
                 </Card>
               </Col>
               <Col span={12}>
                 <Card>
-                  <Title level={4}>{battle.competitor2?.name}</Title>
-                  <Descriptions column={1}>
-                    <Descriptions.Item label="英文名">{battle.competitor2?.englishName}</Descriptions.Item>
-                    <Descriptions.Item label="城市">{battle.competitor2?.city}</Descriptions.Item>
-                    <Descriptions.Item label="舞团">{battle.competitor2?.crew}</Descriptions.Item>
-                  </Descriptions>
+                  <Title level={4}>选手2</Title>
+                  {battle.competitor2 ? (
+                    <Descriptions column={1}>
+                      <Descriptions.Item label="姓名">{battle.competitor2.realName}</Descriptions.Item>
+                      <Descriptions.Item label="艺名">{battle.competitor2.bBoyName || '-'}</Descriptions.Item>
+                      <Descriptions.Item label="性别">{
+                        battle.competitor2.gender === 'male' ? '男' : 
+                        battle.competitor2.gender === 'female' ? '女' : '其他'
+                      }</Descriptions.Item>
+                      <Descriptions.Item label="舞团">{battle.competitor2.team || '-'}</Descriptions.Item>
+                      <Descriptions.Item label="国籍">{battle.competitor2.nationality || '-'}</Descriptions.Item>
+                      {battle.winnerId === battle.competitor2.id && (
+                        <Descriptions.Item label="状态">
+                          <Tag color="gold">获胜者</Tag>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <div>未分配选手</div>
+                  )}
                 </Card>
               </Col>
             </Row>
@@ -196,40 +252,62 @@ const BattleDetail: React.FC = () => {
               </Button>
             }
           >
-            <Table 
-              columns={columns} 
-              dataSource={scores}
-              rowKey="id"
-              pagination={false}
-            />
+            {scores && scores.length > 0 ? (
+              <Table 
+                columns={columns} 
+                dataSource={scores}
+                rowKey="id"
+                pagination={false}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>暂无评分数据</div>
+            )}
           </Card>
         </Col>
 
-        {battle.status === 'completed' && (
+        {battle.status !== 'completed' && (
           <Col span={24}>
             <Card title="比赛结果">
               <Row gutter={16} align="middle">
-                <Col span={12}>
+                <Col span={24} style={{ textAlign: 'center' }}>
+                  <Space>
+                    {battle.competitor1 && (
+                      <Button 
+                        type="primary" 
+                        onClick={() => handleSetWinner(battle.competitor1.id)}
+                      >
+                        设置 {battle.competitor1.realName || battle.competitor1.bBoyName} 为获胜者
+                      </Button>
+                    )}
+                    {battle.competitor2 && (
+                      <Button 
+                        type="primary" 
+                        onClick={() => handleSetWinner(battle.competitor2.id)}
+                      >
+                        设置 {battle.competitor2.realName || battle.competitor2.bBoyName} 为获胜者
+                      </Button>
+                    )}
+                  </Space>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+        )}
+
+        {battle.status === 'completed' && battle.winnerId && (
+          <Col span={24}>
+            <Card title="比赛结果">
+              <Row gutter={16} align="middle">
+                <Col span={24} style={{ textAlign: 'center' }}>
                   <Statistic 
                     title="获胜者" 
-                    value={battle.winner?.name || '未设置'} 
+                    value={
+                      battle.winnerId === battle.competitor1?.id
+                        ? (battle.competitor1?.realName || battle.competitor1?.bBoyName)
+                        : (battle.competitor2?.realName || battle.competitor2?.bBoyName)
+                    }
+                    valueStyle={{ color: '#faad14', fontSize: '24px' }}
                   />
-                </Col>
-                <Col span={12}>
-                  <Space>
-                    <Button 
-                      type="primary" 
-                      onClick={() => handleSetWinner(battle.competitor1?.id)}
-                    >
-                      设置 {battle.competitor1?.name} 为获胜者
-                    </Button>
-                    <Button 
-                      type="primary" 
-                      onClick={() => handleSetWinner(battle.competitor2?.id)}
-                    >
-                      设置 {battle.competitor2?.name} 为获胜者
-                    </Button>
-                  </Space>
                 </Col>
               </Row>
             </Card>
@@ -249,18 +327,34 @@ const BattleDetail: React.FC = () => {
           onFinish={handleSubmitScore}
         >
           <Form.Item
+            name="judgeId"
+            label="评委ID"
+            rules={[{ required: true, message: '请输入评委ID' }]}
+          >
+            <InputNumber style={{ width: '100%' }} min={1} />
+          </Form.Item>
+
+          <Form.Item
             name="competitorId"
             label="选手"
             rules={[{ required: true, message: '请选择选手' }]}
           >
             <Select>
-              <Option value={battle.competitor1?.id}>{battle.competitor1?.name}</Option>
-              <Option value={battle.competitor2?.id}>{battle.competitor2?.name}</Option>
+              {battle.competitor1 && (
+                <Option value={battle.competitor1.id}>
+                  {battle.competitor1.realName || battle.competitor1.bBoyName}
+                </Option>
+              )}
+              {battle.competitor2 && (
+                <Option value={battle.competitor2.id}>
+                  {battle.competitor2.realName || battle.competitor2.bBoyName}
+                </Option>
+              )}
             </Select>
           </Form.Item>
 
           <Form.Item
-            name="technicalScore"
+            name="techniqueScore"
             label="技术分"
             rules={[{ required: true, message: '请输入技术分' }]}
           >
@@ -268,17 +362,17 @@ const BattleDetail: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="creativeScore"
-            label="创意分"
-            rules={[{ required: true, message: '请输入创意分' }]}
+            name="originalityScore"
+            label="原创性"
+            rules={[{ required: true, message: '请输入原创性分数' }]}
           >
             <InputNumber min={0} max={10} step={0.1} style={{ width: '100%' }} />
           </Form.Item>
 
           <Form.Item
-            name="performanceScore"
-            label="表现力"
-            rules={[{ required: true, message: '请输入表现力分数' }]}
+            name="executionScore"
+            label="执行力"
+            rules={[{ required: true, message: '请输入执行力分数' }]}
           >
             <InputNumber min={0} max={10} step={0.1} style={{ width: '100%' }} />
           </Form.Item>
@@ -292,7 +386,7 @@ const BattleDetail: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="comment"
+            name="comments"
             label="评语"
           >
             <Input.TextArea rows={4} />

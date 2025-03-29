@@ -65,7 +65,6 @@ const CompetitionsList: React.FC = () => {
 
   const handleCreate = async (values: any) => {
     try {
-      console.log("values>>>>", values)
       const [startDate, endDate] = values.dateRange || [];
       const [_, registrationDeadline] = values.registrationDateRange || [];
 
