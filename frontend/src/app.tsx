@@ -39,7 +39,7 @@ export async function getInitialState(): Promise<{
 // 布局配置
 export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
-    logo: 'https://img.icons8.com/external-xnimrodx-lineal-color-xnimrodx/64/null/external-dancer-dance-xnimrodx-lineal-color-xnimrodx.png',
+    logo: 'https://img.ixintu.com/download/jpg/20200909/a27a8cb1fb9d6dbaf2bbaff07b6e4800_512_512.jpg!bg',
     menu: {
       locale: false,
     },
@@ -81,4 +81,4 @@ export const request: RequestConfig = {
       return response;
     },
   ],
-}; 
+};
