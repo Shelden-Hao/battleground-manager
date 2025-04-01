@@ -106,6 +106,17 @@ export default defineConfig({
         },
       ],
     },
+    {
+      name: '用户管理',
+      path: '/users',
+      routes: [
+        {
+          name: '用户列表',
+          path: '/users',
+          component: './Users',
+        },
+      ],
+    },
   ],
   npmClient: 'npm',
 });

@@ -123,3 +123,10 @@ export async function getBattlesByStageId(stageId: number) {
     method: 'GET',
   });
 }
+
+// 根据对战id获取所有评分
+export async function getScoresByBattleId(battleId: number) {
+  return request<BattleScoresResponse>(`/api/scores/battle/${battleId}`, {
+    method: 'GET',
+  });
+}

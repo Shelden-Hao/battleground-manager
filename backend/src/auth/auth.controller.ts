@@ -20,7 +20,6 @@ export class AuthController {
     @ApiResponse({status: 200, description: '登录成功'})
     @ApiResponse({status: 401, description: '登录失败'})
     async login(@Request() req) {
-        console.log('login', req);
         return this.authService.login(req.user);
     }
 
