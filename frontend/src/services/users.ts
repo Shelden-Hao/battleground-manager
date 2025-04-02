@@ -23,7 +23,7 @@ export const deleteUserById = (id: number) => {
  * 更新用户信息
  * @param newInfo
  */
-export const updateUser = newInfo => {
+export const updateUser = (id: number, newInfo) => {
     return request(`/api/users/${id}`, {
         method: 'PUT',
         data: newInfo,

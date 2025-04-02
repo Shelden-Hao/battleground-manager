@@ -10,7 +10,6 @@ const { confirm } = Modal;
 
 interface UserType {
   id: number;
-  username: string;
   name?: string;
   email?: string;
   phone?: string;
@@ -52,6 +51,7 @@ const UserManagement: React.FC = () => {
         try {
           await deleteUserById(id);
           message.success('用户删除成功');
+          await fetchUsers();
         } catch (error) {
           message.error('删除用户失败');
         }
@@ -76,12 +76,11 @@ const UserManagement: React.FC = () => {
 
       if (editingUser) {
         // 编辑现有用户
-        await updateUser({
-          id: editingUser.id,
+        await updateUser(editingUser.id,{
           ...values,
         });
-
         message.success('用户更新成功');
+        await fetchUsers();
       } else {
         // 添加新用户
         const newUser = await createUser(values);
@@ -91,6 +90,7 @@ const UserManagement: React.FC = () => {
 
       setModalVisible(false);
     } catch (error) {
+      console.log("=>(index.tsx:98) error", error);
       // 表单验证错误
       message.error('表单验证失败');
     }
@@ -237,14 +237,19 @@ const UserManagement: React.FC = () => {
           layout="vertical"
           initialValues={{ role: 'staff' }}
         >
-          <Form.Item
-            name="username"
-            label="用户名"
-            rules={[{ required: true, message: '请输入用户名' }]}
+          {!editingUser && (<Form.Item
+              name="username"
+              label="用户名"
+              rules={[{required: true, message: '请输入用户名'}]}
           >
-            <Input disabled={!!editingUser} />
+            <Input />
+          </Form.Item>)}
+          <Form.Item
+              name="name"
+              label="姓名"
+          >
+            <Input />
           </Form.Item>
-
           {!editingUser && (
             <Form.Item
               name="password"
@@ -254,14 +259,6 @@ const UserManagement: React.FC = () => {
               <Input.Password />
             </Form.Item>
           )}
-
-          <Form.Item
-            name="name"
-            label="姓名"
-          >
-            <Input />
-          </Form.Item>
-
           <Form.Item
             name="email"
             label="邮箱"
