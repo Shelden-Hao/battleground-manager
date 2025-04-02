@@ -24,15 +24,15 @@
 
 ### 数据库配置
 
-1. 创建 MySQL 数据库
-2. 执行 `sql/schema.sql` 脚本创建表结构
-3. 执行 `sql/seed.sql` 脚本填充初始数据
+1. 创建 MySQL 数据库 `breaking_dance_competition`
+2. 执行 `sql/breaking_dance_competition.sql` 脚本创建表结构，并填充初始数据
+3. 进入后端目录：`cd backend`，在 `.env` 中将 `DATABASE_URL` 设置数据库连接地址(更改为自己的数据库用户名和密码)
 
 ### 后端配置
 
 1. 进入后端目录：`cd backend`
 2. 安装依赖：`npm install`
-3. 修改 `.env` 文件中的数据库连接信息
+3. 修改 `.env` 文件中的数据库连接信息(更改为自己的数据库用户名和密码)
 4. 开发模式启动：`npm run start:dev`
 5. 或生产模式构建：`npm run build` 然后 `npm run start:prod`
 
@@ -41,7 +41,7 @@
 1. 进入前端目录：`cd frontend`
 2. 安装依赖：`npm install`
 3. 开发模式启动：`npm run dev`
-4. 生产模式构建：`npm run build`
+4. 或生产模式构建：`npm run build`
 
 ## 系统角色
 
@@ -71,7 +71,4 @@
 
 ## 预设账号
 
-- 管理员：admin / password
-- 评委：judge1 / password
-- 评委：judge2 / password
-- 工作人员：staff1 / password 
+- 管理员：admin123 / admin123
