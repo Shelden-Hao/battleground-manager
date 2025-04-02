@@ -1,23 +1,23 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Card, Col, Row, Statistic, Table } from 'antd';
 import { PageContainer } from '@ant-design/pro-components';
-import { request, useRequest } from '@umijs/max';
 import { Line } from '@ant-design/charts';
+import {getCompetitionsList} from "@/services/competitions";
 
 const Dashboard: React.FC = () => {
-  const { data: statistics, loading } = useRequest(() => {
-    return request('/api/statistics');
-  });
 
-  const { data: recentCompetitions } = useRequest(() => {
-    return request('/api/competitions', {
-      params: {
-        current: 1,
-        pageSize: 5,
-        status: 'in_progress',
-      },
-    });
-  });
+    useEffect(() => {
+        fetchCompetitions();
+    }, []);
+    const [competitionList, setCompetitionList] = useState([])
+
+    const fetchCompetitions = async () => {
+        const response = await getCompetitionsList({
+            page: 1,
+            pageSize: 5,
+        });
+        setCompetitionList(response.data.items)
+    }
 
   const competitionColumns = [
     {
@@ -68,6 +68,12 @@ const Dashboard: React.FC = () => {
     { year: '2022', value: 8 },
     { year: '2023', value: 12 },
   ];
+  const statistics = {
+    inProgressCompetitions: 5,
+    registeredCompetitors: 100,
+    judges: 20,
+    battles: 50,
+  };
 
   const config = {
     data,
@@ -93,7 +99,6 @@ const Dashboard: React.FC = () => {
             <Statistic
               title="进行中的比赛"
               value={statistics?.inProgressCompetitions || 0}
-              loading={loading}
             />
           </Card>
         </Col>
@@ -102,7 +107,6 @@ const Dashboard: React.FC = () => {
             <Statistic
               title="已注册的选手"
               value={statistics?.registeredCompetitors || 0}
-              loading={loading}
             />
           </Card>
         </Col>
@@ -111,7 +115,6 @@ const Dashboard: React.FC = () => {
             <Statistic
               title="评委数量"
               value={statistics?.judges || 0}
-              loading={loading}
             />
           </Card>
         </Col>
@@ -120,7 +123,6 @@ const Dashboard: React.FC = () => {
             <Statistic
               title="总比赛场次"
               value={statistics?.battles || 0}
-              loading={loading}
             />
           </Card>
         </Col>
@@ -129,7 +131,7 @@ const Dashboard: React.FC = () => {
       <Card title="最近比赛" style={{ marginTop: 16 }}>
         <Table
           rowKey="id"
-          dataSource={recentCompetitions?.data || []}
+          dataSource={competitionList || []}
           columns={competitionColumns}
           pagination={false}
         />
