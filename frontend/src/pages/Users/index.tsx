@@ -3,6 +3,7 @@ import { Card, Table, Button, Input, message, Space, Tag, Modal, Form, Select } 
 import { PlusOutlined, SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './index.less';
+import {createUser, deleteUserById, getUsersList, updateUser} from "@/services/users";
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -33,26 +34,9 @@ const UserManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // 实际项目中这里应该调用API获取数据
-      // const response = await getUsersList();
-      // setUsers(response);
-      
-      // 模拟数据获取
-      setTimeout(() => {
-        const roles: Array<'admin' | 'judge' | 'competitor' | 'staff'> = ['admin', 'judge', 'competitor', 'staff'];
-        const mockData: UserType[] = Array.from({ length: 20 }).map((_, index) => ({
-          id: index + 1,
-          username: `user${index + 1}`,
-          name: index % 3 === 0 ? undefined : `用户${index + 1}`,
-          email: `user${index + 1}@example.com`,
-          phone: index % 4 === 0 ? undefined : `1381234${(10000 + index).toString().substring(1)}`,
-          role: roles[index % roles.length],
-          createdAt: `2023-02-${10 + (index % 20)}T08:00:00Z`,
-          updatedAt: `2023-02-${15 + (index % 15)}T09:30:00Z`,
-        }));
-        setUsers(mockData);
-        setLoading(false);
-      }, 500);
+      const response = await getUsersList();
+      setUsers(response);
+      setLoading(false);
     } catch (error) {
       message.error('获取用户列表失败');
       setLoading(false);
@@ -66,11 +50,7 @@ const UserManagement: React.FC = () => {
       content: '确定要删除这个用户吗？此操作不可恢复。',
       onOk: async () => {
         try {
-          // 实际项目中应该调用API删除用户
-          // await deleteUserById(id);
-          
-          // 模拟删除
-          setUsers(users.filter(user => user.id !== id));
+          await deleteUserById(id);
           message.success('用户删除成功');
         } catch (error) {
           message.error('删除用户失败');
@@ -82,63 +62,37 @@ const UserManagement: React.FC = () => {
   const handleAddOrEdit = (user?: UserType) => {
     setEditingUser(user || null);
     form.resetFields();
-    
+
     if (user) {
       form.setFieldsValue(user);
     }
-    
+
     setModalVisible(true);
   };
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (editingUser) {
         // 编辑现有用户
-        // 实际项目中应该调用API更新用户
-        // await updateUser({
-        //   id: editingUser.id,
-        //   ...values,
-        // });
-        
-        // 模拟更新
-        setUsers(users.map(user => {
-          if (user.id === editingUser.id) {
-            return {
-              ...user,
-              ...values,
-              updatedAt: new Date().toISOString(),
-            };
-          }
-          return user;
-        }));
-        
+        await updateUser({
+          id: editingUser.id,
+          ...values,
+        });
+
         message.success('用户更新成功');
       } else {
         // 添加新用户
-        // 实际项目中应该调用API创建用户
-        // const response = await createUser(values);
-        
-        // 模拟创建
-        const newUser: UserType = {
-          id: Math.max(...users.map(u => u.id), 0) + 1,
-          username: values.username,
-          name: values.name,
-          email: values.email,
-          phone: values.phone,
-          role: values.role,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        
+        const newUser = await createUser(values);
         setUsers([...users, newUser]);
         message.success('用户创建成功');
       }
-      
+
       setModalVisible(false);
     } catch (error) {
       // 表单验证错误
+      message.error('表单验证失败');
     }
   };
 
@@ -149,7 +103,7 @@ const UserManagement: React.FC = () => {
       competitor: { color: 'green', text: '选手' },
       staff: { color: 'orange', text: '工作人员' },
     };
-    
+
     const roleInfo = roleMap[role] || { color: 'default', text: role };
     return <Tag color={roleInfo.color}>{roleInfo.text}</Tag>;
   };
@@ -237,9 +191,9 @@ const UserManagement: React.FC = () => {
       <Card
         title="用户管理"
         extra={
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
             onClick={() => handleAddOrEdit()}
           >
             添加用户
@@ -341,4 +295,4 @@ const UserManagement: React.FC = () => {
   );
 };
 
-export default UserManagement; 
+export default UserManagement;
