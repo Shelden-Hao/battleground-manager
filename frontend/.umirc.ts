@@ -60,6 +60,11 @@ export default defineConfig({
           component: './Competitions/edit',
           hideInMenu: true,
         },
+        {
+          path: '/competitions/:id/stages/:stageId',
+          component: './Competitions/stageDetail',
+          hideInMenu: true,
+        }
       ],
     },
     {

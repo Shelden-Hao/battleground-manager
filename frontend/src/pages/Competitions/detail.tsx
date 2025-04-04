@@ -191,6 +191,13 @@ const CompetitionDetail: React.FC = () => {
           <Button
             type="link"
             icon={<EditOutlined />}
+            onClick={() => history.push(`/competitions/${competitionId}/stages/${record.id}`)}
+          >
+            详情
+          </Button>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
             onClick={() => history.push(`/competitions/${competitionId}/stages/${record.id}/edit`)}
           >
             编辑

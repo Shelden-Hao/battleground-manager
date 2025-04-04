@@ -51,7 +51,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
         return <div>{avatarChildren}</div>;
       },
     },
-    footerRender: () => <div style={{ textAlign: 'center', padding: '20px' }}>霹雳舞比赛管理系统 ©2023</div>,
+    footerRender: () => <div style={{ textAlign: 'center', padding: '20px' }}>霹雳舞比赛管理系统 ©2025</div>,
   };
 };
 
