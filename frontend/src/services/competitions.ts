@@ -61,7 +61,7 @@ export interface CreateCompetitionParams {
 export interface UpdateCompetitionParams extends Partial<CreateCompetitionParams> {}
 
 export interface CreateCompetitionStageParams {
-  competitionId: number;
+  competitionId?: number;
   name: string;
   description?: string;
   stageOrder: number;
@@ -191,8 +191,8 @@ export async function getCompetitionStages(competitionId: number) {
 }
 
 // 创建比赛阶段
-export async function createCompetitionStage(data: CreateCompetitionStageParams) {
-  return request<CompetitionStage>(`/api/competitions/${data.competitionId}/stages`, {
+export async function createCompetitionStage(competitionId: number, data: CreateCompetitionStageParams) {
+  return request<CompetitionStage>(`/api/competitions/${competitionId}/stages`, {
     method: 'POST',
     data,
   });

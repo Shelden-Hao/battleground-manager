@@ -1,17 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { history, useParams } from '@umijs/max';
-import { 
-  Card, Descriptions, Button, Space, Tag, message, 
-  Tabs, Table, Modal, Form, DatePicker, Input, Select, Popconfirm 
+import React, {useEffect, useState} from 'react';
+import {history, useParams} from '@umijs/max';
+import {
+  Button,
+  Card,
+  DatePicker,
+  Descriptions,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  Tabs,
+  Tag
 } from 'antd';
-import { 
-  ArrowLeftOutlined, EditOutlined, PlusOutlined, 
-  DeleteOutlined, TrophyOutlined, TeamOutlined 
-} from '@ant-design/icons';
-import { getCompetitionDetail, getCompetitionStages, createCompetitionStage, deleteCompetitionStage } from '@/services/competitions';
-import { formatDate } from '@/utils/utils';
-import type { API } from '@/services/typings';
-import type { ColumnsType } from 'antd/es/table';
+import {ArrowLeftOutlined, DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
+import {
+  createCompetitionStage,
+  deleteCompetitionStage,
+  getCompetitionDetail,
+  getCompetitionStages
+} from '@/services/competitions';
+import {formatDate} from '@/utils/utils';
+import type {API} from '@/services/typings';
+import type {ColumnsType} from 'antd/es/table';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -20,7 +34,7 @@ const { RangePicker } = DatePicker;
 const CompetitionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const competitionId = parseInt(id);
-  
+
   const [loading, setLoading] = useState(false);
   const [competition, setCompetition] = useState<API.Competition>();
   const [stages, setStages] = useState<API.CompetitionStage[]>([]);
@@ -34,13 +48,15 @@ const CompetitionDetail: React.FC = () => {
         getCompetitionDetail(competitionId),
         getCompetitionStages(competitionId),
       ]);
+      console.log('Competition response:', competitionResponse);
+      console.log('Stages response:', stagesResponse);
 
       if (competitionResponse.success) {
         setCompetition(competitionResponse.data);
       } else {
         message.error('获取比赛信息失败');
       }
-      
+
       if (stagesResponse.success) {
         setStages(stagesResponse.data);
       } else {
@@ -61,11 +77,12 @@ const CompetitionDetail: React.FC = () => {
   const handleCreateStage = async (values: any) => {
     try {
       const [startDate, endDate] = values.dateRange;
-      
-      const response = await createCompetitionStage(competitionId, {
+      delete values.dateRange;
+
+      const response = await createCompetitionStage(competitionId,{
         ...values,
-        startDate: startDate.format('YYYY-MM-DD'),
-        endDate: endDate.format('YYYY-MM-DD'),
+        startDate,
+        endDate,
       });
 
       if (response.success) {
@@ -125,9 +142,10 @@ const CompetitionDetail: React.FC = () => {
 
   const getStageTypeText = (type: string) => {
     const types: Record<string, string> = {
-      preliminary: '预选赛',
-      quarterfinal: '四分之一决赛',
-      semifinal: '半决赛',
+      qualification: '预选赛',
+      top_16: '十六分之一决赛',
+      top_8: '八分之一决赛',
+      top_4: '四分之一决赛',
       final: '决赛',
     };
     return types[type] || type;
@@ -141,20 +159,20 @@ const CompetitionDetail: React.FC = () => {
     },
     {
       title: '阶段类型',
-      dataIndex: 'type',
-      key: 'type',
+      dataIndex: 'stageType',
+      key: 'stageType',
       render: (type: string) => getStageTypeText(type),
     },
     {
       title: '开始时间',
-      dataIndex: 'startDate',
-      key: 'startDate',
+      dataIndex: 'startTime',
+      key: 'startTime',
       render: (text: string) => formatDate(text, 'yyyy-MM-dd'),
     },
     {
       title: '结束时间',
-      dataIndex: 'endDate',
-      key: 'endDate',
+      dataIndex: 'endTime',
+      key: 'endTime',
       render: (text: string) => formatDate(text, 'yyyy-MM-dd'),
     },
     {
@@ -201,8 +219,8 @@ const CompetitionDetail: React.FC = () => {
       <Card
         title={
           <Space>
-            <Button 
-              icon={<ArrowLeftOutlined />} 
+            <Button
+              icon={<ArrowLeftOutlined />}
               onClick={() => history.push('/competitions')}
               type="link"
             />
@@ -294,9 +312,10 @@ const CompetitionDetail: React.FC = () => {
             rules={[{ required: true, message: '请选择阶段类型' }]}
           >
             <Select>
-              <Option value="preliminary">预选赛</Option>
-              <Option value="quarterfinal">四分之一决赛</Option>
-              <Option value="semifinal">半决赛</Option>
+              <Option value="qualification">预选赛</Option>
+              <Option value="top_16">十六分之一决赛</Option>
+              <Option value="sop_8">八分之一决赛</Option>
+              <Option value="top_4">四分之一决赛</Option>
               <Option value="final">决赛</Option>
             </Select>
           </Form.Item>
@@ -339,4 +358,4 @@ const CompetitionDetail: React.FC = () => {
   );
 };
 
-export default CompetitionDetail; 
+export default CompetitionDetail;
