@@ -11,7 +11,7 @@
  Target Server Version : 80019 (8.0.19)
  File Encoding         : 65001
 
- Date: 02/04/2025 20:49:34
+ Date: 04/04/2025 17:11:31
 */
 
 SET NAMES utf8mb4;
@@ -89,7 +89,7 @@ CREATE TABLE `competition_stages`  (
   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL,
   `stage_order` int NOT NULL,
-  `stage_type` enum('qualification','top_16','top_8','top_4','final') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `stage_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `start_time` datetime(3) NULL DEFAULT NULL,
   `end_time` datetime(3) NULL DEFAULT NULL,
   `status` enum('pending','in_progress','completed') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'pending',
@@ -98,7 +98,7 @@ CREATE TABLE `competition_stages`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `competition_stages_competition_id_fkey`(`competition_id` ASC) USING BTREE,
   CONSTRAINT `competition_stages_competition_id_fkey` FOREIGN KEY (`competition_id`) REFERENCES `competitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of competition_stages
@@ -109,6 +109,7 @@ INSERT INTO `competition_stages` VALUES (3, 1, 'Top 8', 'Quarter finals', 3, 'to
 INSERT INTO `competition_stages` VALUES (4, 1, 'Top 4', 'Semi finals', 4, 'top_4', NULL, NULL, 'pending', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
 INSERT INTO `competition_stages` VALUES (5, 1, 'Final', 'Final battle', 5, 'final', NULL, NULL, 'pending', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
 INSERT INTO `competition_stages` VALUES (6, 4, '预选赛', '16进8淘汰赛', 1, 'qualification', '2023-04-01 10:00:00.000', '2023-04-03 18:00:00.000', 'pending', '2025-03-29 04:15:09.476', '2025-03-29 04:26:23.783');
+INSERT INTO `competition_stages` VALUES (7, 4, 'TOP2', 'fdafadf', 0, 'final', '2025-04-29 16:00:00.000', '2025-04-30 16:00:00.000', 'pending', '2025-04-04 07:49:52.592', '2025-04-04 07:49:52.592');
 
 -- ----------------------------
 -- Table structure for competitions
@@ -168,10 +169,10 @@ CREATE TABLE `competitors`  (
 -- ----------------------------
 -- Records of competitors
 -- ----------------------------
-INSERT INTO `competitors` VALUES (1, 4, 1, 'REG001', 'B-Boy One', 'John Doe', 'male', NULL, 'USA', 'Team A', NULL, 'registered', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
-INSERT INTO `competitors` VALUES (2, 5, 1, 'REG002', 'B-Boy Two', 'Jane Smith', 'male', NULL, 'Canada', 'Team B', NULL, 'registered', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
+INSERT INTO `competitors` VALUES (1, 4, 1, 'REG001', 'B-Boy One', 'John Doe', 'male', '2025-04-09', 'USA', 'Team A', 'http://dummyimage.com/400x400', 'registered', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
+INSERT INTO `competitors` VALUES (2, 5, 1, 'REG002', 'B-Boy Two', 'Jane Smith', 'male', '2025-04-03', 'Canada', 'Team B', 'http://dummyimage.com/400x400', 'registered', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
 INSERT INTO `competitors` VALUES (3, 8, 1, '45', '素需部先件产', '委区论压往统专', 'female', '1975-08-24', 'us', 'team3', 'http://dummyimage.com/400x400', 'eliminated', '2025-03-29 07:30:51.893', '2025-03-29 07:34:21.982');
-INSERT INTO `competitors` VALUES (4, NULL, 1, '34', 'y哥', '选手y', 'male', NULL, 'us', 'team5', NULL, 'registered', '2025-03-29 13:17:30.907', '2025-03-29 13:17:30.907');
+INSERT INTO `competitors` VALUES (4, NULL, 1, '34', 'y哥', '选手y', 'male', '2025-04-01', 'us', 'team5', 'http://dummyimage.com/400x400', 'registered', '2025-03-29 13:17:30.907', '2025-03-29 13:17:30.907');
 
 -- ----------------------------
 -- Table structure for judges
@@ -196,7 +197,6 @@ CREATE TABLE `judges`  (
 -- Records of judges
 -- ----------------------------
 INSERT INTO `judges` VALUES (1, 2, 1, 'Judge One', 'Professional breaking judge', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
-INSERT INTO `judges` VALUES (2, 3, 1, 'Judge Two', 'Experienced breaking judge', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
 
 -- ----------------------------
 -- Table structure for scores
@@ -227,8 +227,6 @@ CREATE TABLE `scores`  (
 -- Records of scores
 -- ----------------------------
 INSERT INTO `scores` VALUES (2, 1, 1, 2, 8.00, 8.50, 8.00, 8.50, 'Excellent moves', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
-INSERT INTO `scores` VALUES (3, 1, 2, 1, 8.50, 8.50, 8.00, 8.50, 'Strong technique', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
-INSERT INTO `scores` VALUES (4, 1, 2, 2, 8.00, 8.00, 8.50, 8.00, 'Creative style', '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
 INSERT INTO `scores` VALUES (5, 4, 1, 1, 6.00, 9.00, 8.00, 4.00, 'good-good', '2025-03-27 15:12:32.112', '2025-03-27 15:23:53.451');
 
 -- ----------------------------
@@ -248,18 +246,18 @@ CREATE TABLE `users`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `users_username_key`(`username` ASC) USING BTREE,
   UNIQUE INDEX `users_email_key`(`email` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
 INSERT INTO `users` VALUES (1, 'admin', '$2b$10$YourHashedPasswordHere', 'admin', 'Admin User', 'admin@example.com', NULL, '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
-INSERT INTO `users` VALUES (2, 'judge1', '$2b$10$YourHashedPasswordHere', 'judge', 'Judge One', 'judge1@example.com', NULL, '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
-INSERT INTO `users` VALUES (3, 'judge2', '$2b$10$YourHashedPasswordHere', 'judge', 'Judge Two', 'judge2@example.com', NULL, '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
+INSERT INTO `users` VALUES (2, 'judge1', '$2b$10$YourHashedPasswordHere', 'judge', 'Judge One', 'judge1@example.com', NULL, '2025-03-26 22:18:20.000', '2025-04-02 14:15:47.069');
 INSERT INTO `users` VALUES (4, 'competitor1', '$2b$10$YourHashedPasswordHere', 'competitor', 'Competitor One', 'competitor1@example.com', NULL, '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
 INSERT INTO `users` VALUES (5, 'competitor2', '$2b$10$YourHashedPasswordHere', 'competitor', 'Competitor Two', 'competitor2@example.com', NULL, '2025-03-26 22:18:20.000', '2025-03-26 22:18:20.000');
 INSERT INTO `users` VALUES (6, 'admin123', '$2b$10$QA.9KsYoMemfZLg8HJupcuBZIc9LlUYuhpvsGlvM/NL3PUc8h5Zsa', 'admin', 'admin123', 'admin123@example.com', '13932316900', '2025-03-26 14:25:27.000', '2025-03-26 14:25:27.000');
 INSERT INTO `users` VALUES (8, 'competitor123', '$2b$10$yNmBxisJsaLy9EbPml9Gy.6CItYKL7k.I1jYqne6FExl3V.Bcyr1K', 'competitor', 'competitor123', 'competitor123@example.com', '13932310110', '2025-03-27 14:16:26.091', '2025-03-27 14:16:26.091');
 INSERT INTO `users` VALUES (9, 'competitor6', 'competitor6', 'competitor', 'competitor6', 'competitor6@example.com', '13932310021', '2025-04-01 23:15:37.154', '2025-04-01 23:15:37.154');
+INSERT INTO `users` VALUES (10, 'staff1', 'staff1', 'staff', 'staff1', 'staff1@qq.com', '13012345678', '2025-04-02 14:33:14.272', '2025-04-02 14:33:14.272');
 
 SET FOREIGN_KEY_CHECKS = 1;
