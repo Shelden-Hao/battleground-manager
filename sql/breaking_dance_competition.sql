@@ -14,6 +14,10 @@
  Date: 04/04/2025 17:11:31
 */
 
+-- 创建 schema 并切换到 schema
+-- create schema breaking_dance_competition collate utf8mb4_0900_ai_ci;
+-- use breaking_dance_competition;
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
