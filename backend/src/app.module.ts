@@ -7,10 +7,13 @@ import { BattlesModule } from './battles/battles.module';
 import { CompetitionsModule } from './competitions/competitions.module';
 import { CompetitorsModule } from './competitors/competitors.module';
 
+const envFilePath = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', envFilePath], // 先加载通用配置，再加载环境特定配置
     }),
     PrismaModule,
     AuthModule,
@@ -22,4 +25,4 @@ import { CompetitorsModule } from './competitors/competitors.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {} 
+export class AppModule { } 
