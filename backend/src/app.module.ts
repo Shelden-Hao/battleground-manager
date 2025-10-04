@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { BattlesModule } from './battles/battles.module';
 import { CompetitionsModule } from './competitions/competitions.module';
 import { CompetitorsModule } from './competitors/competitors.module';
+import { LogsModule } from './logs/logs.module';
 
 const envFilePath = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 
@@ -21,6 +22,7 @@ const envFilePath = process.env.NODE_ENV === 'production' ? '.env.production' : 
     BattlesModule,
     CompetitionsModule,
     CompetitorsModule,
+    LogsModule,
   ],
   controllers: [],
   providers: [],
